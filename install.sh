@@ -112,10 +112,10 @@ install_shellby(){
     docker swarm leave --force 2>/dev/null
 
     # Check if something is running on port 80
-    # is_port_in_use 80
+    is_port_in_use 80
 
     # Check if something is running on port 443
-    # is_port_in_use 443
+    is_port_in_use 443
 
     local ip=$(ipv4)
     if [ -z "$ip" ]; then
@@ -151,8 +151,8 @@ install_shellby(){
     docker pull postgres:17.2
 
     # docker service create --name shellby --network shellby-network --mount type=volume,source=shellby-volume,target=/shellby -p 80:80 -p 443:443 shellby
-
     # success_print "Shellby service created"
+    
     success_print "Shellby is now running at https://$ip"
 }
 
