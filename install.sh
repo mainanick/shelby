@@ -107,15 +107,17 @@ install_shellby(){
     mkdir -p /etc/shellby
     chmod 777 /etc/shellby
 
-    install_docker
-
-    docker swarm leave --force 2>/dev/null
-
     # Check if something is running on port 80
     is_port_in_use 80
 
     # Check if something is running on port 443
     is_port_in_use 443
+
+    install_docker
+
+    docker swarm leave --force 2>/dev/null
+
+    
 
     local ip=$(ipv4)
     if [ -z "$ip" ]; then
@@ -152,7 +154,7 @@ install_shellby(){
 
     # docker service create --name shellby --network shellby-network --mount type=volume,source=shellby-volume,target=/shellby -p 80:80 -p 443:443 shellby
     # success_print "Shellby service created"
-    
+
     success_print "Shellby is now running at https://$ip"
 }
 
