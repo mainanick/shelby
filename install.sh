@@ -118,13 +118,10 @@ install_shellby(){
     docker swarm leave --force 2>/dev/null
 
     
-
     local ip=$(ipv4)
     if [ -z "$ip" ]; then
         ip=$(ipv6)
     fi
-
-    info_print "IP address: $ip"
 
     # Check if the IP is empty
     if [ -z "$ip" ]; then
@@ -132,8 +129,10 @@ install_shellby(){
         exit 1
     fi
 
-    info_print "Initializing Docker Swarm"
+    info_print "IP address: $ip"
 
+    info_print "Initializing Docker Swarm"
+    
     if ! docker swarm init --advertise-addr "$ip"; then
         error_print "Error: Failed to initialize Docker Swarm" >&2
         exit 1
