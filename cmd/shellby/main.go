@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/mainanick/shellby/internal/setup"
 )
 
 type Time struct {
@@ -12,6 +14,11 @@ type Time struct {
 }
 
 func main() {
+	// Setup
+
+	setup.Initialize()
+	setup.SetupTraefik()
+
 	// defining router
 	mux := http.NewServeMux()
 	mux.HandleFunc("/time", getTime)
