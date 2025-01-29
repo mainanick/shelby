@@ -55,21 +55,16 @@ is_port_in_use (){
 ipv4(){
     local ip=""
     
-    # Try IPv4 first
-    # First attempt: ifconfig.io
     ip=$(curl -4s --connect-timeout 5 https://ifconfig.io 2>/dev/null)
     
-    # Second attempt: ipgrab.io
     if [ -z "$ip" ]; then
         ip=$(curl -4s --connect-timeout 5 https://ipgrab.io 2>/dev/null)
     fi
 
-    # Third attempt: ipify.org
     if [ -z "$ip" ]; then
         ip=$(curl --connect-timeout 5 https://api.ipify.org 2>/dev/null)
     fi
 
-    # Fourth attempt: ipecho.net
     if [ -z "$ip" ]; then
         ip=$(curl -4s --connect-timeout 5 https://ipecho.net/plain 2>/dev/null)
     fi
@@ -80,21 +75,16 @@ ipv4(){
 ipv6(){
     local ip=""
     
-    # Try IPv6 first
-    # First attempt: ifconfig.io
     ip=$(curl -6s --connect-timeout 5 https://ifconfig.io 2>/dev/null)
     
-    # Second attempt: ipgrab.io
     if [ -z "$ip" ]; then
         ip=$(curl -6s --connect-timeout 5 https://ipgrab.io 2>/dev/null)
     fi
 
-    # Third attempt: ipify.org
     if [ -z "$ip" ]; then
         ip=$(curl -6s --connect-timeout 5 https://api6.ipify.org 2>/dev/null)
     fi
 
-    # Fourth attempt: ipecho.net
     if [ -z "$ip" ]; then
         ip=$(curl -6s --connect-timeout 5 https://ipecho.net/plain 2>/dev/null)
     fi
@@ -108,10 +98,10 @@ install_shellby(){
     chmod 777 /etc/shellby
 
     # Check if something is running on port 80
-    is_port_in_use 80
+    # is_port_in_use 80
 
     # Check if something is running on port 443
-    is_port_in_use 443
+    # is_port_in_use 443
 
     install_docker
 
@@ -133,7 +123,12 @@ install_shellby(){
 
     info_print "Initializing Docker Swarm"
     
-    if ! docker swarm init --advertise-addr "$ip"; then
+    # if ! docker swarm init --advertise-addr "$ip"; then
+    #     error_print "Error: Failed to initialize Docker Swarm" >&2
+    #     exit 1
+    # fi
+
+    if ! docker swarm init; then
         error_print "Error: Failed to initialize Docker Swarm" >&2
         exit 1
     fi
@@ -147,14 +142,27 @@ install_shellby(){
 
     success_print "Shellby network created"
 
-    # Pull 
+    
     docker pull traefik:v3.3.2
     docker pull postgres:17.2
 
-    # docker service create --name shellby --network shellby-network --mount type=volume,source=shellby-volume,target=/shellby -p 80:80 -p 443:443 shellby
-    # success_print "Shellby service created"
+    docker service create \
+      --name shellby \
+      --replicas 1 \
+      --network shellby-network \
+      --mount type=bind,source=/var/run/docker.sock,target=/var/run/docker.sock \
+      --mount type=bind,source=/etc/shellby,target=/etc/shellby \
+      --mount type=volume,source=shellby-docker-config,target=/root/.docker \
+      --publish published=3000,target=3000,mode=host \
+      --update-parallelism 1 \
+      --update-order stop-first \
+      --constraint 'node.role == manager' \
+      -e ADDR=$ip \
+      localhost:5000/shellby
 
-    success_print "Shellby is now running at https://$ip"
+    success_print "Shellby service created"
+
+    # success_print "Shellby is now running at https://$ip"
 }
 
 install_shellby

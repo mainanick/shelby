@@ -17,8 +17,8 @@ func main() {
 	mux.HandleFunc("/time", getTime)
 
 	// starting server
-	fmt.Println("Server is running at :8080")
-	log.Fatal(http.ListenAndServe(":8080", mux))
+	fmt.Println("Server is running at :8100")
+	log.Fatal(http.ListenAndServe(":8100", mux))
 }
 
 func getTime(w http.ResponseWriter, r *http.Request) {

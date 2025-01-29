@@ -23,7 +23,7 @@ clean:
 	rm -rf bin/
 
 run: 
-	$(GOCMD) run main.go
+	$(GOCMD) run cmd/shellby/main.go
 
 # Cross compilation
 build-linux:
